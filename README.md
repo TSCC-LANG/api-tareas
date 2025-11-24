@@ -51,8 +51,8 @@ Una vez que el servidor esté corriendo ("Application startup complete"), puedes
 
 1. Documentación Interactiva (Swagger UI) Ingresa a la siguiente URL en tu navegador para probar los endpoints directamente sin escribir código:
 
-http://jquiroz:3027/docs
+http://jquiroz.net:3027/docs
 
 2. Verificación de Estado Para comprobar que el sistema está operativo:
 
-http://jquiroz:3027/health
+http://jquiroz.net:3027/health
