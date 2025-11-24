@@ -1,0 +1,266 @@
+openapi: 3.0.3
+info:
+  title: API REST Básica de Tareas
+  version: 1.0.0
+  description: |
+    API mínima para operaciones CRUD sobre el recurso "tasks".
+    Incluye endpoint de salud y almacenamiento en memoria.
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+tags:
+  - name: Health
+    description: Estado del servicio
+  - name: Tasks
+    description: Gestión de tareas
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Verifica el estado del servicio
+      operationId: getHealth
+      responses:
+        '200':
+          description: Estado del servicio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  uptime:
+                    type: number
+                    format: float
+                    description: Segundos desde que inició el proceso
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Marca de tiempo del servidor
+                additionalProperties: false
+
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Lista todas las tareas
+      operationId: listTasks
+      responses:
+        '200':
+          description: Lista de tareas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+              examples:
+                ejemplo:
+                  value:
+                    - id: 1
+                      title: Estudiar REST
+                      done: false
+                    - id: 2
+                      title: Hacer práctica
+                      done: true
+    post:
+      tags: [Tasks]
+      summary: Crea una nueva tarea
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+            examples:
+              ejemplo:
+                value:
+                  title: Repasar examen
+                  done: false
+      responses:
+        '201':
+          description: Tarea creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador de la tarea
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      tags: [Tasks]
+      summary: Obtiene una tarea por id
+      operationId: getTaskById
+      responses:
+        '200':
+          description: Tarea encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Tarea no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags: [Tasks]
+      summary: Actualiza completamente una tarea
+      operationId: updateTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+            examples:
+              ejemplo:
+                value:
+                  title: REST básico
+                  done: true
+      responses:
+        '200':
+          description: Tarea actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tarea no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags: [Tasks]
+      summary: Actualiza parcialmente una tarea
+      operationId: patchTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPatch'
+            examples:
+              ejemplo:
+                value:
+                  done: false
+      responses:
+        '200':
+          description: Tarea actualizada parcialmente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Tarea no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Tasks]
+      summary: Elimina una tarea
+      operationId: deleteTask
+      responses:
+        '204':
+          description: Eliminación exitosa (sin contenido)
+        '404':
+          description: Tarea no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Task:
+      type: object
+      description: Representa una tarea
+      properties:
+        id:
+          type: integer
+          example: 3
+        title:
+          type: string
+          example: Repasar examen
+        done:
+          type: boolean
+          example: false
+      required: [id, title, done]
+      additionalProperties: false
+
+    TaskCreate:
+      type: object
+      description: Datos para crear una tarea
+      properties:
+        title:
+          type: string
+        done:
+          type: boolean
+          default: false
+      required: [title]
+      additionalProperties: false
+
+    TaskUpdate:
+      type: object
+      description: Datos para actualización completa de una tarea
+      properties:
+        title:
+          type: string
+        done:
+          type: boolean
+      required: [title, done]
+      additionalProperties: false
+
+    TaskPatch:
+      type: object
+      description: Datos para actualización parcial de una tarea
+      properties:
+        title:
+          type: string
+        done:
+          type: boolean
+      additionalProperties: false
+      anyOf:
+        - required: [title]
+        - required: [done]
+
+    Error:
+      type: object
+      description: Formato de error estándar
+      properties:
+        error:
+          type: string
+          example: Not found
+      required: [error]
+      additionalProperties: false
+
